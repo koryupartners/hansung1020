@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 시대의 과제·평가 설계 — 프롬프트 복사 보드</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--bg:#f6f7fb;--ink:#1c2233;--mut:#5d667a;--line:#e1e5ef;--pri:#2f3fa8;--pri2:#4658d6;--acc:#d9822b;--ok:#1f9d63;--card:#fff}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:130px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,'Noto Sans KR',system-ui,sans-serif;line-height:1.6}
+.hero{background:linear-gradient(135deg,#1b2470 0%,#2f3fa8 55%,#4658d6 100%);color:#fff;padding:56px 24px 44px}
+.wrap{max-width:1160px;margin:0 auto}
+.eyebrow{font:500 12px 'IBM Plex Mono',monospace;letter-spacing:.16em;opacity:.8}
+.hero h1{font-size:clamp(26px,4.4vw,42px);line-height:1.25;margin:10px 0 8px;font-weight:800;letter-spacing:-.02em}
+.hero p{margin:0 0 18px;opacity:.9;max-width:680px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.tag{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:4px 12px;border-radius:99px;font-size:13px}
+.dl{display:inline-flex;align-items:center;gap:10px;margin:0 0 20px;padding:13px 24px;border-radius:12px;background:#fff;color:var(--pri);font-weight:800;font-size:16px;text-decoration:none;box-shadow:0 6px 20px rgba(10,15,60,.3);transition:.15s}
+.dl:hover{transform:translateY(-2px);background:#fff6ec;color:#a85a0c}
+.ai{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ai b{font-size:13px;opacity:.85;margin-right:4px}
+.ai a{display:inline-flex;align-items:center;gap:8px;color:#fff;text-decoration:none;font-size:14px;padding:7px 14px;border-radius:99px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);transition:.15s}
+.ai a:hover{background:rgba(255,255,255,.95);color:var(--pri)}
+.dot{width:9px;height:9px;border-radius:50%}
+.controls{position:sticky;top:0;z-index:20;background:rgba(246,247,251,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.controls .wrap{padding:12px 24px;display:flex;flex-direction:column;gap:10px}
+#q{width:100%;padding:11px 16px;border:1px solid var(--line);border-radius:12px;font:inherit;background:#fff}
+#q:focus{outline:2px solid var(--pri2);border-color:transparent}
+.pills{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.pills a{white-space:nowrap;text-decoration:none;color:var(--pri);background:#fff;border:1px solid var(--line);padding:6px 14px;border-radius:99px;font-size:14px;font-weight:600}
+.pills a:hover{background:var(--pri);color:#fff}
+main.wrap{padding:8px 24px 70px}
+.mod{margin-top:44px}
+.mh{display:flex;gap:18px;align-items:flex-start;margin-bottom:18px}
+.num{font:500 52px/1 'IBM Plex Mono',monospace;color:var(--pri);opacity:.9}
+.mh h2{margin:4px 0 2px;font-size:24px;letter-spacing:-.01em}
+.mh p{margin:0;color:var(--mut);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:.15s;position:relative}
+.card:hover{box-shadow:0 8px 24px rgba(30,40,100,.1);border-color:#c9d0ee}
+.card.wide{grid-column:span 2}
+.top{display:flex;align-items:center;gap:8px}
+.sl{font:500 12px 'IBM Plex Mono',monospace;background:#eceffc;color:var(--pri);padding:2px 9px;border-radius:6px}
+.cp{margin-left:auto;border:0;background:var(--pri);color:#fff;font:600 13px Pretendard,sans-serif;padding:7px 14px;border-radius:9px;cursor:pointer}
+.cp:hover{background:var(--pri2)}
+.card.done .cp{background:var(--ok)}
+.card h3{margin:0;font-size:17px;letter-spacing:-.01em}
+.bf{font-size:13px;color:var(--mut);background:#fff6ec;border-left:3px solid var(--acc);padding:6px 10px;border-radius:4px}
+pre{margin:0;font:400 13.5px/1.7 'IBM Plex Mono','Noto Sans KR',monospace;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;background:#fafbfe;border:1px solid var(--line);border-radius:10px;padding:14px;max-height:300px;overflow-y:auto;color:#232a40}
+.card.wide pre{max-height:380px}
+.empty{display:none;text-align:center;color:var(--mut);padding:60px 0}
+footer{text-align:center;color:var(--mut);font-size:13px;padding:30px 0 50px;border-top:1px solid var(--line)}
+@media(max-width:820px){.grid{grid-template-columns:1fr}.card.wide{grid-column:auto}.num{font-size:38px}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">PROMPT COPY BOARD</div>
+  <h1>AI 시대의 과제·평가 설계 전략<br>베끼기 어려운 과제 만들기</h1>
+  <p>카드를 클릭하면 프롬프트 전체가 복사됩니다. [ ] 안은 내 과목에 맞게 바꿔 사용하세요.</p>
+  <div class="tags"><span class="tag">한성대학교 교수학습센터 교수워크숍</span><span class="tag">2026. 10. 20.(화) 10:00–12:00</span><span class="tag">고유파트너즈 · 고일화</span></div>
+  <a class="dl" href="https://drive.google.com/drive/folders/1zVo6zPgLk5pNt_jAAHjcLhhEAQC4q9j5?usp=sharing" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg>구글 드라이브에서 자료 다운로드</a>
+  <div class="ai"><b>바로가기</b>
+    <a href="https://chatgpt.com/" target="_blank" rel="noopener"><i class="dot" style="background:#10a37f"></i>ChatGPT</a>
+    <a href="https://gemini.google.com/" target="_blank" rel="noopener"><i class="dot" style="background:#4285f4"></i>Gemini</a>
+    <a href="https://claude.ai/" target="_blank" rel="noopener"><i class="dot" style="background:#d97757"></i>Claude</a>
+    <a href="https://notebooklm.google.com/" target="_blank" rel="noopener"><i class="dot" style="background:#fbbc04"></i>제미나이 노트북</a>
+    <a href="https://labs.google/flow/" target="_blank" rel="noopener"><i class="dot" style="background:#ea4335"></i>구글 Flow</a>
+  </div>
+</div></header>
+<div class="controls"><div class="wrap">
+  <input id="q" type="search" placeholder="프롬프트 검색 (예: 루브릭, 팀 과제, 안내문)">
+  <nav class="pills" id="pills"></nav>
+</div></div>
+<main class="wrap" id="main"></main>
+<div class="wrap empty" id="empty">검색 결과가 없습니다.</div>
+<footer>고유파트너즈 · 고일화 &nbsp;|&nbsp; 생성형 AI 결과는 초안이며 교수자 검수가 필요합니다.</footer>
+<script>
+const DATA=[{"no": "01", "title": "프롬프트 작성의 핵심 원리", "desc": "역할·목표·맥락·지침 4요소와 고품질 프롬프트 작성 5가지 원칙", "cards": [{"slide": 7, "title": "구조화 전 — 막연한 요청 (개선 전)", "content": "대학생들이 AI로 대신 쓰기 어려운 과제를 설계해 줘."}, {"slide": 8, "title": "구조화 후 — 역할·목표·맥락·지침 (개선 후)", "content": "너는 대학 교수학습 설계 전문가야.\n\n과목은 [지속가능한 사회](교양, 1학년, 수강생 60명)이고, 학습목표는 [지속가능발전 개념을 이해하고 도시 사례를 비판적으로 분석한다]야. 기존 과제는 [도시 사례 조사 보고서 A4 3장, 학기 중 1회 제출]이야.\n\n이 과제를 생성형 AI가 대신 작성하기 어렵도록 재설계해 줘.\n\n수업 중 다룬 사례와 자료를 활용하게 하고,\n학생의 선택과 판단 근거를 요구하며,\n주제 제안-초안-AI 활용 기록-최종본 4단계로 제출하게 해줘.", "wide": true}, {"slide": 9, "title": "① 명확하고 구체적인 지시", "content": "당신은 대학 교수학습 설계 및 평가 전문가입니다.\n대학 1학년 교양 과목 「지속가능한 사회」(수강생 60명)의 보고서 과제를\n생성형 AI가 대신 작성하기 어렵도록 재설계해 주세요.\n기존 과제는 도시 사례 조사 보고서(A4 3장, 학기 중 1회 제출)이며,\n학습목표는 지속가능발전 개념의 이해와 도시 사례의 비판적 분석입니다.\n\n다음 내용을 포함해 주세요.\n① 재설계 과제 문항 3가지 (서로 다른 접근)\n② 수업 맥락 연결 요소 (수업 중 다룬 사례·자료 활용 방식)\n③ 학생의 선택과 판단 근거를 요구하는 장치\n④ 단계별 제출 계획 (주제 제안-초안-AI 활용 기록-최종본)과 단계별 비중\n⑤ 학생에게 제공할 과제 안내문 예시\n\nAI가 일반론으로 답하기 쉬운 표현은 피하고,\n학생이 실제로 선택하고 판단한 과정이 드러나는 제출물을 중심으로 작성하세요.\n마지막에는 교수자가 바로 사용할 수 있는 과제 안내문을 작성해 주세요.\n[형식: 재설계안 비교표 + 학생 안내문]", "wide": true, "before": "대학생 보고서 과제를 AI가 대신 쓰지 못하게 만들어줘."}, {"slide": 10, "title": "② 충분한 배경지식 제공", "content": "나는 대학에서 전공 과목 「데이터 분석 입문」을 가르치는 교수야.\n\n최근 학생들이 AI가 작성한 분석 코드와 보고서를 그대로 제출하는 경우가 있어서,\n제출물만으로는 학생의 실제 이해도를 판단하기 어려워.\n수강생은 2학년 40명이고, 중간고사 1회와 보고서 1회로 평가해 왔어.\n학습목표는 데이터를 정리하고 결과를 해석해 의사결정에 활용하는 거야.\n기존 평가를 전부 바꾸기보다 현재 틀 안에서 실제로 적용할 수 있는 개선안을 원하고, 교수 부담은 주당 2시간 이내여야 해.\n\n다음 조건을 반영하여 평가 개선안을 작성해 줘.\n① 평가 개선안 3개 제안\n② 평가 개선의 배경과 필요성\n③ 학습목표와 평가 요소의 연결\n④ 평가 대상과 확인 방법 (구술 또는 서면 질의 포함)\n⑤ 학기 중 적용 일정 (4주 단위)\n⑥ 예상되는 한계와 학생 반발에 대한 대응\n학교 규정이나 선행 사례 확인이 필요한 부분은 별도로 표시해 줘.\n[형식: 개선안 비교표 + 평가 운영 계획서]", "wide": true, "before": "새로운 평가 방법을 만들어 줘."}, {"slide": 11, "title": "③ 구체적인 샘플 제시 (루브릭)", "content": "평가 루브릭 항목 예시를 작성해 줘.\n\n[샘플 - 가상 과제]\n평가 항목: 근거와 판단의 구체성 (30점)\n우수(27~30점):\n선택한 사례의 장단점을 수업 개념 2개 이상으로 설명하고, 본인의 판단과 그 근거를 구체적 자료와 함께 제시한다.\n보통(21~26점):\n수업 개념 1개를 적용하여 사례를 설명하나, 본인의 판단 근거가 일부 일반론에 머문다.\n미흡(0~20점):\n사례 요약에 그치거나, 판단과 근거가 확인되지 않는다.\n관찰 지표:\n수업 개념 적용 개수, 본인 판단 문장의 유무, 인용 자료의 출처 확인 여부.\n위 샘플과 동일한 구성과 문체로 다음 평가 항목의 루브릭을 작성해 줘.\n\n평가 항목: AI 활용의 비판적 검토 (20점)\n과제: 지속가능한 사회 과목의 도시 사례 분석 보고서\n조건:\n① 우수·보통·미흡 기준과 관찰 지표를 모두 포함\n② 각 기준은 제출물이나 AI 활용 기록서에서 확인할 수 있는 행동 중심으로 작성\n③ 배점 구간은 샘플과 같은 방식으로 표시\n④ AI 사용 여부 자체로 점수 차이를 두지 않도록 작성", "wide": true}, {"slide": 12, "title": "④ 복잡한 과제의 단계별 분할", "content": "1단계. 평가 문제점 분석\nAI 활용이 쉬운 환경에서 [데이터 분석 입문] 과목의 현재 평가 방식([제출형 분석 보고서 1회])이\n학생의 실제 이해도를 확인하지 못하는 문제점 5가지를 찾아줘.\n\n2단계. 활용 기준 수립\n과제 작성, 자료조사, 발표 준비, 시험 대비 등\n평가 활동별로 AI 활용 허용 범위(허용, 조건부 허용, 금지)와 주의사항을 구분하여 정리해 줘.\n\n3단계. 평가 체계 작성\n앞서 분석한 내용을 바탕으로 이 과목의 평가 체계(평가 요소, 비중, 시기, 이해도 확인 방법)와\nAI 활용 안내문을 작성해 줘.\n\n교수 확인사항과 학생 준수사항을 구분하고,\n마지막에는 학생용 AI 활용 및 제출 체크리스트 10개를 만들어 줘.", "wide": true, "before": "AI 시대에 맞는 평가 방법을 만들어 줘."}, {"slide": 13, "title": "⑤ 반복 개선 및 보완 (1차→최종 피드백)", "content": "[1차 요청]\n대학 전공 과목의 4인 팀 프로젝트에서 AI를 활용하더라도\n개인별 기여를 공정하게 평가하는 방법을 설계해 줘.\n\n[1차 결과 후 피드백]\n내용이 너무 일반적이야.\n실제로 팀 프로젝트에서 한 명이 AI로 대부분을 만들고 나머지는 이름만 올리는 상황을 가정해서,\n중간 점검, 역할 분담 기록, 동료평가, 개별 질의 확인으로 구분해 수정해 줘.\n\n[2차 결과 후 피드백]\n좋아. 교수가 팀당 10분 이내로 확인할 수 있게 줄이고,\n동료평가는 5점 척도 5개 항목으로 구성해 줘.\n\n[최종 피드백]\n학생에게 학기 초에 안내할 수 있도록\n[평가 방식 개요 / 개인 기여 확인 방법 / 동료평가 항목 / AI 활용 기록 방법 / 평가 비중]\n형식의 팀 프로젝트 평가 안내서로 정리해 줘.", "wide": true}, {"slide": 14, "title": "AI로 고품질 학술연구 프롬프트 만들기", "content": "생성형 AI가 대학생의 학습성과에 미치는 영향을 연구하고 싶어.\n새로운 연구주제와 적합한 연구방법을 제안받고 싶어.\n\n---\n\n위 연구 업무를 생성형 AI로 효과적으로 수행할 수 있도록\n역할, 목표, 맥락, 지침이 포함된\n고품질 학술연구용 프롬프트로 개선해서 코드블록으로 작성해 줘."}]}, {"no": "02", "title": "내 과제의 AI 대체 용이성 진단", "desc": "내 과제를 AI에 직접 입력해 취약도를 점검하는 실습 1", "cards": [{"slide": 22, "title": "프롬프트 1 · 과제 취약도 진단", "content": "너는 대학 교수의 과제 설계 자문가야.\n아래 과제를 생성형 AI가 얼마나 쉽게 수행할 수 있는지 진단해줘.\n\n과제:\n교양 과목 \"지속가능한 사회\"의 과제로, 관심 있는 지속가능 도시 사례를 조사하여\nA4 3장 분량의 보고서를 작성하시오.\n학기 8주차까지 1회 제출하며 평가는 내용 충실도 60점, 구성 20점, 형식 20점이다.\n\n기준: 맥락 의존도, 개인 경험 요구, 과정 증빙 가능성, 검증 가능성을\n각각 5점 척도(5점이 AI 대체가 가장 어려움)로 평가하고 근거를 한 줄씩 써줘.", "wide": true}, {"slide": 23, "title": "프롬프트 2 · 학생 관점 시뮬레이션", "content": "아래 과제를 학생이 AI에게 입력한다고 가정하고,\n학생이 쓸 법한 프롬프트 3개를 만들어줘.\n\n그리고 그 프롬프트로 나온\n결과물의 한계(일반적 내용, 수업 맥락 부재, 근거 부족)를 구체적으로 알려줘.\n\n과제: 교양 과목 \"지속가능한 사회\"의 과제로,\n관심 있는 지속가능 도시 사례를 조사하여 A4 3장 분량의 보고서를 작성하시오.", "wide": true}]}, {"no": "03", "title": "내 교과목 과제 재설계 실습", "desc": "실습 2~5 · 과제 재설계, 안내문, 루브릭, 팀 과제, 피드백, 성찰 질문", "cards": [{"slide": 37, "title": "프롬프트 3 · 과제 재설계 (양식)", "content": "다음 과제를 생성형 AI가\n대신 작성하기 어렵도록 재설계해줘.\n\n교과목: [과목명]\n학습목표: [목표]\n기존 과제: [내용]\n\n조건: 수업 중 다룬 사례·자료를 활용하고, 학생의 선택과 판단 근거를 요구하며, 주제 제안-초안-AI 활용 기록-최종본 4단계 제출로 구성해줘. 재설계안 3가지를 비교해서 제시해줘.", "wide": true}, {"slide": 37, "title": "프롬프트 3 · 과제 재설계 (샘플 적용)", "content": "다음 과제를 생성형 AI가 대신 작성하기 어렵도록 재설계해줘.\n\n교과목: 지속가능한 사회(교양, 2학점, 수강생 60명)\n학습목표: 지속가능발전 개념을 이해하고 도시 사례를 비판적으로 분석한다\n기존 과제: 관심 있는 지속가능 도시 사례를 조사해 A4 3장 보고서를 작성하시오. 학기 8주차까지 1회 제출, 평가는 내용 60점·구성 20점·형식 20점.\n\n조건: 수업 중 다룬 사례·자료를 활용하고, 학생의 선택과 판단 근거를 요구하며, 주제 제안-초안-AI 활용 기록-최종본 4단계 제출로 구성해줘. 재설계안 3가지를 비교해서 제시해줘.", "wide": true}, {"slide": 38, "title": "프롬프트 4 · 학생 안내문", "content": "위 재설계안 중 [번호]번을\n학생에게 배부할 과제 안내문으로 작성해줘.\n\n포함: 과제 목적, 4주 단계별 제출 일정,\n제출물 형식과 분량, 평가 기준 요약.\n\n학생이 이해하기 쉬운 문장으로 쓰고,\n교수가 정해야 할 부분은 [수정 필요]로 표시해줘."}, {"slide": 39, "title": "프롬프트 5 · 평가 루브릭 (양식)", "content": "아래 과제의 평가 루브릭을 표로 만들어줘. 평가 항목 4개, 항목별 비중, 우수·보통·미흡 기준을 서술해줘.\n항목에 맥락 적용, 근거와 판단의 구체성, 과정 증빙, AI 활용의 비판적 검토를 포함해줘.\n과제: [과제 내용]"}, {"slide": 39, "title": "프롬프트 5 · 평가 루브릭 (샘플 적용)", "content": "아래 과제의 평가 루브릭을 표로 만들어줘. 평가 항목 4개, 항목별 비중, 우수·보통·미흡 기준을 서술해줘.\n항목에 맥락 적용, 근거와 판단의 구체성, 과정 증빙, AI 활용의 비판적 검토를 포함해줘.\n\n과제: [지속가능한 사회 / 교양 2학점 / 수강생 60명] 수업에서 다룬 도시 사례 중 1개를 골라 지속가능발전 관점에서 비판적으로 분석한다.\n1주차 주제 제안서(A4 반 장), 3주차 초안, 5주차 AI 활용 기록(사용한 프롬프트·AI 답변·수정한 부분과 이유), 8주차 최종 보고서(A4 3장)를 순서대로 제출한다.\n최종 보고서에는 수업 중 배운 개념 2개 이상을 적용하고, 선택한 사례의 한계에 대한 본인의 판단과 근거를 쓴다.", "wide": true}, {"slide": 40, "title": "프롬프트 6 · AI 활용 안내문", "content": "이 교과목의 AI 활용 안내문을 작성해줘.\n허용 범위(허용, 조건부 허용, 금지), AI 활용 기록 제출 방법, 문의 방법을 포함해줘.\n\n허용 수준은 [보조 허용/명시 활용/필수 활용 중 선택]이야.\n학교 규정 확인이 필요한 부분은 [규정 확인 필요]로,\n교수가 정할 부분은 [수정 필요]로 표시해줘."}, {"slide": 41, "title": "AI 활용 안내문 샘플 A · 조건부 허용형", "content": "[AI 활용 안내] 지속가능한 사회 · 도시 사례 분석 보고서\n- 생성형 AI 사용 범위: 아이디어 탐색과 문장 교정에 한정합니다.\n- AI가 작성한 문장을 그대로 제출하는 것은 금지합니다.\n- AI를 사용했다면 AI 활용 기록서(사용 도구, 입력한 질문, 수정한 부분과 이유)를 보고서와 함께 제출합니다.\n- 제출 후 3분 내외 질의를 통해 보고서 내용의 이해도를 확인할 수 있습니다.\n- 위반 시 학칙 제00조(부정행위 처리 규정)에 따라 처리합니다.\n- 사용 범위가 불분명하면 제출 전 담당 교수(koil@hansung.ac.kr)에게 문의하세요.", "wide": true}, {"slide": 41, "title": "AI 활용 안내문 샘플 B · 금지형(대면 평가)", "content": "[AI 활용 안내] 데이터 분석 입문 · 중간평가\n- 평가 방식: 10월 28일 수업 시간 중 대면으로 실시합니다.\n- 평가 중 생성형 AI를 포함한 모든 전자기기 사용을 금지합니다.\n- 평가 준비 단계에서 AI를 학습 보조(개념 설명, 예상 문제 풀이)로 쓰는 것은 허용합니다.\n- 장애 등 별도 지원이 필요하면 10월 21일까지 학과 사무실(02-0000-0000)로 요청하세요.\n- 위반 시 학칙 제00조(부정행위 처리 규정)에 따라 처리합니다.", "wide": true}, {"slide": 43, "title": "프롬프트 7 · 팀 과제 개인 기여 확인", "content": "팀 프로젝트 [지속가능 도시 사례 비교 발표]에서\n개인별 기여를 확인하는 장치를 설계해줘. 팀 인원은 [4]명이야.\n\n포함: 역할 분담 계획서 양식, 중간 점검용 팀원별 질문 6개,\n동료평가 항목 5개(5점 척도), 기여 의심 시 교수가 확인할 질문."}, {"slide": 44, "title": "프롬프트 8 · 학생 초안 피드백", "content": "아래 루브릭 기준으로 학생 초안에 대한 피드백 코멘트 초안을 써줘.\n항목별로 잘한 점 1개, 보완할 점 1개, 다음 제출 전 해볼 일 1개를 3문장 이내로.\n(학생 이름 등 개인정보는 지우고 입력했어)\n\n루브릭: [① 맥락 적용 30점(수업에서 다룬 개념 2개 이상을 사례에 연결) ② 근거와 판단의 구체성 30점 ③ 과정 증빙 20점 ④ AI 활용의 비판적 검토 20점]\n\n초안: [저는 코펜하겐의 자전거 도시 정책을 사례로 골랐습니다. 이 정책은 탄소 배출을 줄이고 시민 건강을 높였기 때문에 지속가능한 도시의 좋은 사례입니다. 앞으로 다른 도시도 이 정책을 따라 해야 합니다. AI에게 코펜하겐 정책을 요약해 달라고 했고 내용을 그대로 정리했습니다.]", "wide": true}, {"slide": 45, "title": "프롬프트 9 · 오류 포함 답안 만들기", "content": "[지속가능발전 관점에서 본 도시 자전거 정책]에 대한 A4 1장 분량의 답안을 작성하되,\n수업 내용에 비추어 틀린 내용 3개와 근거 없는 주장 1개를 자연스럽게 섞어줘.\n\n교수용으로 오류 위치와 올바른 설명을 정답표로 따로 정리해줘.\n수강생은 [교양 1학년] 수준이야."}, {"slide": 46, "title": "프롬프트 10 · 성찰 질문 설계", "content": "[도시 사례 분석 보고서] 제출 때 함께 낼 성찰 질문 5개를 만들어줘.\n\nAI가 일반론으로 답하기 어렵도록\n학생의 선택 과정, 막혔던 순간, 수업에서 들은\n구체적 논의, 달라진 생각을 묻는 질문이어야 해.\n\n질문마다 좋은 답변과 피상적 답변의 차이를 한 줄로 알려줘."}]}];
+const main=document.getElementById('main'),pills=document.getElementById('pills');
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+DATA.forEach((m,mi)=>{
+  pills.insertAdjacentHTML('beforeend',`<a href="#m${m.no}">${m.no} ${esc(m.title)}</a>`);
+  const sec=document.createElement('section');sec.className='mod';sec.id='m'+m.no;
+  sec.innerHTML=`<div class="mh"><div class="num">${m.no}</div><div><h2>${esc(m.title)}</h2><p>${esc(m.desc)}</p></div></div><div class="grid"></div>`;
+  const g=sec.querySelector('.grid');
+  m.cards.forEach(c=>{
+    const d=document.createElement('article');d.className='card'+(c.wide?' wide':'');
+    d.dataset.s=(c.title+' '+c.content).toLowerCase();
+    d.innerHTML=`<div class="top"><span class="sl">슬라이드 ${c.slide}</span><button class="cp">복사</button></div><h3>${esc(c.title)}</h3>${c.before?`<div class="bf">막연한 질문 예: ${esc(c.before)}</div>`:''}<pre>${esc(c.content)}</pre>`;
+    d.addEventListener('click',e=>{
+      if(e.target.closest('pre')&&String(getSelection()))return;
+      copy(c.content,d);
+    });
+    g.appendChild(d);
+  });
+  main.appendChild(sec);
+});
+function copy(t,d){
+  const ok=()=>{d.classList.add('done');const b=d.querySelector('.cp');b.textContent='✓ 복사됨';setTimeout(()=>{d.classList.remove('done');b.textContent='복사'},1600)};
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(ok).catch(()=>fb(t,ok))}else fb(t,ok);
+}
+function fb(t,ok){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity=0;document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){}a.remove()}
+document.getElementById('q').addEventListener('input',e=>{
+  const v=e.target.value.trim().toLowerCase();let n=0;
+  document.querySelectorAll('.card').forEach(c=>{const s=!v||c.dataset.s.includes(v);c.style.display=s?'':'none';if(s)n++});
+  document.querySelectorAll('.mod').forEach(m=>{m.style.display=[...m.querySelectorAll('.card')].some(c=>c.style.display!=='none')?'':'none'});
+  document.getElementById('empty').style.display=n?'none':'block';
+});
+</script>
+</body>
+</html>
